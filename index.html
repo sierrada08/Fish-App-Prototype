@@ -54,6 +54,7 @@
     <div class="form-group">
         <label for="timeOfDay">Time of Day:</label>
         <select id="timeOfDay">
+            <option value="early-morning">Early Morning</option>
             <option value="morning">Morning</option>
             <option value="afternoon">Afternoon</option>
             <option value="evening">Evening</option>
@@ -69,10 +70,11 @@
     </div>
 
     <div class="form-group">
-        <label for="species">Target Fish Species:</label>
+        <label for="species">Target Fish Species (Trout):</label>
         <select id="species">
-            <option value="trout">Trout</option>
-            <option value="bass">Bass</option>
+            <option value="rainbow-trout">Rainbow Trout</option>
+            <option value="cutthroat-trout">Cutthroat Trout</option>
+            <option value="brown-trout">Brown Trout</option>
         </select>
     </div>
 
@@ -154,7 +156,7 @@
             const flow = await fetchFlowData();
             const weather = await fetchWeatherData();
 
-            const prompt = `What fly should I use if I am going fishing at ${timeOfDay} on the ${location}, the flow is ${flow} CFS, and the weather is going to be ${weather.condition} with a temperature of ${weather.temp}°C?`;
+            const prompt = `What fly should I use if I am going fishing at ${timeOfDay} on the ${location}, the flow is ${flow} CFS, and the weather is going to be ${weather.condition} with a temperature of ${weather.temp}°C for ${species}?`;
 
             document.getElementById('output').innerText = prompt;
         });
