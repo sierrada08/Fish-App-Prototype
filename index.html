@@ -56,4 +56,39 @@
         <select id="timeOfDay">
             <option value="morning">Morning</option>
             <option value="afternoon">Afternoon</option>
-            <optio
+            <option value="evening">Evening</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="location">Fishing Location:</label>
+        <select id="location">
+            <option value="gallatin-upper">Gallatin River - Upper</option>
+            <option value="gallatin-lower">Gallatin River - Lower</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="species">Target Fish Species:</label>
+        <select id="species">
+            <option value="trout">Trout</option>
+            <option value="bass">Bass</option>
+        </select>
+    </div>
+
+    <button id="submitBtn">Submit</button>
+
+    <div id="output"></div>
+
+    <script>
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            const timeOfDay = document.getElementById('timeOfDay').value;
+            const location = document.getElementById('location').value;
+            const species = document.getElementById('species').value;
+
+            const prompt = `What flies should I use on the ${location} in the ${timeOfDay} for ${species}?`;
+            document.getElementById('output').innerText = prompt;
+        });
+    </script>
+</body>
+</html>
