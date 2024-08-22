@@ -81,15 +81,83 @@
     <div id="output"></div>
 
     <script>
-        document.getElementById('submitBtn').addEventListener('click', function() {
+        async function fetchFlowData() {
+            const site = "06043500"; // Gallatin River at Bozeman site number
+            const url = `https://waterservices.usgs.gov/nwis/iv/?format=json&sites=${site}&parameterCd=00065,00060&period=P7D`;
+
+            const response = await fetch(url);
+            const jsonData = await response.json();
+
+            // Extract the most recent flow data
+            const flowData = jsonData.value.timeSeries.find(series => series.variable.variableCode[0].value === "00060");
+            const mostRecentFlow = flowData.values[0].value.slice(-1)[0].value; // Gets the most recent value
+
+            return mostRecentFlow;
+        }
+
+        async function fetchWeatherData() {
+            const url = "https://api.open-meteo.com/v1/forecast?latitude=45.3702&longitude=-111.1753&hourly=temperature_2m,precipitation,weathercode,windspeed_10m&timezone=America/Denver";
+
+            const response = await fetch(url);
+            const jsonData = await response.json();
+
+            // Extract the most recent weather data
+            const weatherData = jsonData.hourly;
+            const currentWeather = {
+                temp: weatherData.temperature_2m[0],
+                condition: mapWeatherCodeToCondition(weatherData.weathercode[0])
+            };
+
+            return currentWeather;
+        }
+
+        function mapWeatherCodeToCondition(weatherCode) {
+            const conditions = {
+                0: "Clear sky",
+                1: "Mainly clear",
+                2: "Partly cloudy",
+                3: "Overcast",
+                45: "Fog",
+                48: "Depositing rime fog",
+                51: "Drizzle: Light",
+                53: "Drizzle: Moderate",
+                55: "Drizzle: Dense intensity",
+                56: "Freezing Drizzle: Light",
+                57: "Freezing Drizzle: Dense intensity",
+                61: "Rain: Slight",
+                63: "Rain: Moderate",
+                65: "Rain: Heavy intensity",
+                66: "Freezing Rain: Light",
+                67: "Freezing Rain: Heavy intensity",
+                71: "Snow fall: Slight",
+                73: "Snow fall: Moderate",
+                75: "Snow fall: Heavy intensity",
+                77: "Snow grains",
+                80: "Rain showers: Slight",
+                81: "Rain showers: Moderate",
+                82: "Rain showers: Violent",
+                85: "Snow showers: Slight",
+                86: "Snow showers: Heavy",
+                95: "Thunderstorm: Slight or moderate",
+                96: "Thunderstorm with slight hail",
+                99: "Thunderstorm with heavy hail"
+            };
+
+            return conditions[weatherCode] || "Unknown";
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', async function() {
             const timeOfDay = document.getElementById('timeOfDay').value;
             const location = document.getElementById('location').value;
             const species = document.getElementById('species').value;
 
-            const prompt = `What flies should I use on the ${location} in the ${timeOfDay} for ${species}?`;
+            const flow = await fetchFlowData();
+            const weather = await fetchWeatherData();
+
+            const prompt = `What fly should I use if I am going fishing at ${timeOfDay} on the ${location}, the flow is ${flow} CFS, and the weather is going to be ${weather.condition} with a temperature of ${weather.temp}°C?`;
+
             document.getElementById('output').innerText = prompt;
         });
     </script>
 </body>
 </html>
-
