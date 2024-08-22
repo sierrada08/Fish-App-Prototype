@@ -208,18 +208,20 @@
             return conditions[weatherCode] || "Unknown";
         }
 
-        document.getElementById('submitBtn').addEventListener('click', async function() {
+      document.getElementById('submitBtn').addEventListener('click', async function() {
     const timeOfDay = document.getElementById('timeOfDay').value;
     const species = document.getElementById('species').value;
     const sectionData = JSON.parse(document.getElementById('section').value);
 
+    const riverName = document.getElementById('river').options[document.getElementById('river').selectedIndex].text;
     const flow = await fetchFlowData(sectionData.site);
     const weather = await fetchWeatherData(sectionData.town);
 
-    const prompt = `What fly should I use if I am going fishing in the ${sectionData.section} section of the ${document.getElementById('river').options[document.getElementById('river').selectedIndex].text}, in the ${timeOfDay}? The flow is ${flow} CFS, and the weather is going to be ${weather.condition} with a temperature of ${weather.temp}°C. I am targeting ${species}.`;
+    const prompt = `What fly should I use if I am going fishing on the ${riverName}, in the ${sectionData.section} section, during the ${timeOfDay}? The flow is ${flow} CFS, and the weather is going to be ${weather.condition} with a temperature of ${weather.temp}°C. I am targeting ${species}.`;
 
     document.getElementById('output').innerText = prompt;
 });
+
     </script>
 </body>
 </html>
