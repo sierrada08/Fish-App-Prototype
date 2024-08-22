@@ -9,6 +9,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             height: 100vh;
             margin: 0;
             font-family: Arial, sans-serif;
@@ -16,10 +17,43 @@
         }
         h1 {
             text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        select {
+            padding: 5px;
+            width: 200px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #output {
+            margin-top: 20px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <h1>Gallatin River Fly Recommendation Prototype V1</h1>
-</body>
-</html>
+
+    <div class="form-group">
+        <label for="timeOfDay">Time of Day:</label>
+        <select id="timeOfDay">
+            <option value="morning">Morning</option>
+            <option value="afternoon">Afternoon</option>
+            <optio
