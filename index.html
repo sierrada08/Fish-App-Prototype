@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gallatin River Fly Recommendation Prototype V1</title>
+    <title>Gallatin River Fly Recommendation Prototype V2</title>
     <style>
         body {
             display: flex;
@@ -49,11 +49,30 @@
     </style>
 </head>
 <body>
-    <h1>Gallatin River Fly Recommendation Prototype V1</h1>
+    <h1>Bozeman Area Fly Recommendation</h1>
+
+    <div class="form-group">
+        <label for="river">Select River:</label>
+        <select id="river">
+            <option value="">--Select a River--</option>
+            <option value="gallatin">Gallatin River</option>
+            <option value="yellowstone">Yellowstone River</option>
+            <option value="madison">Madison River</option>
+            <option value="east-gallatin">East Gallatin River</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="section">Select Section:</label>
+        <select id="section" disabled>
+            <option value="">--Select a Section--</option>
+        </select>
+    </div>
 
     <div class="form-group">
         <label for="timeOfDay">Time of Day:</label>
         <select id="timeOfDay">
+            <option value="early-morning">Early Morning</option>
             <option value="morning">Morning</option>
             <option value="afternoon">Afternoon</option>
             <option value="evening">Evening</option>
@@ -61,28 +80,69 @@
     </div>
 
     <div class="form-group">
-        <label for="location">Fishing Location:</label>
-        <select id="location">
-            <option value="gallatin-upper">Gallatin River - Upper</option>
-            <option value="gallatin-lower">Gallatin River - Lower</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label for="species">Target Fish Species:</label>
+        <label for="species">Target Fish Species (Trout):</label>
         <select id="species">
-            <option value="trout">Trout</option>
-            <option value="bass">Bass</option>
+            <option value="rainbow-trout">Rainbow Trout</option>
+            <option value="cutthroat-trout">Cutthroat Trout</option>
+            <option value="brown-trout">Brown Trout</option>
         </select>
     </div>
 
-    <button id="submitBtn">Submit</button>
+    <button id="submitBtn" disabled>Submit</button>
 
     <div id="output"></div>
 
     <script>
-        async function fetchFlowData() {
-            const site = "06043500"; // Gallatin River at Bozeman site number
+        const riverSections = {
+            "gallatin": [
+                { section: "Valley", town: "4 Corners, Montana", site: "06043500" },
+                { section: "Canyon", town: "Gallatin Canyon", site: "06043500" },
+                { section: "Big Sky Area", town: "Big Sky, MT", site: "06043500" }
+            ],
+            "yellowstone": [
+                { section: "Paradise Valley", town: "Emigrant, MT", site: "06191500" },
+                { section: "Yankee Jim", town: "Gardiner, MT", site: "06191500" },
+                { section: "Lower Yellowstone - Billings", town: "Big Timber, MT", site: "06191500" }
+            ],
+            "madison": [
+                { section: "Upper", town: "Ennis, MT", site: "06038800" },
+                { section: "Lower", town: "Norris, MT", site: "06038800" }
+            ],
+            "east-gallatin": [
+                { section: "Bozeman Area", town: "Bozeman, MT", site: "06043900" }
+            ]
+        };
+
+        document.getElementById('river').addEventListener('change', function() {
+            const river = this.value;
+            const sectionSelect = document.getElementById('section');
+            sectionSelect.innerHTML = '<option value="">--Select a Section--</option>'; // Reset section options
+
+            if (river) {
+                sectionSelect.disabled = false;
+                riverSections[river].forEach(function(sectionData) {
+                    const option = document.createElement('option');
+                    option.value = JSON.stringify(sectionData);
+                    option.text = sectionData.section;
+                    sectionSelect.add(option);
+                });
+            } else {
+                sectionSelect.disabled = true;
+            }
+
+            document.getElementById('submitBtn').disabled = true;
+        });
+
+        document.getElementById('section').addEventListener('change', function() {
+            const sectionData = this.value;
+            if (sectionData) {
+                document.getElementById('submitBtn').disabled = false;
+            } else {
+                document.getElementById('submitBtn').disabled = true;
+            }
+        });
+
+        async function fetchFlowData(site) {
             const url = `https://waterservices.usgs.gov/nwis/iv/?format=json&sites=${site}&parameterCd=00065,00060&period=P7D`;
 
             const response = await fetch(url);
@@ -95,8 +155,10 @@
             return mostRecentFlow;
         }
 
-        async function fetchWeatherData() {
-            const url = "https://api.open-meteo.com/v1/forecast?latitude=45.3702&longitude=-111.1753&hourly=temperature_2m,precipitation,weathercode,windspeed_10m&timezone=America/Denver";
+        async function fetchWeatherData(town) {
+            const apiKey = 'your-open-meteo-api-key'; // Replace with your actual API key if required
+            const encodedTown = encodeURIComponent(town);
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=45.3702&longitude=-111.1753&hourly=temperature_2m,precipitation,weathercode,windspeed_10m&timezone=America/Denver`;
 
             const response = await fetch(url);
             const jsonData = await response.json();
@@ -148,13 +210,13 @@
 
         document.getElementById('submitBtn').addEventListener('click', async function() {
             const timeOfDay = document.getElementById('timeOfDay').value;
-            const location = document.getElementById('location').value;
             const species = document.getElementById('species').value;
+            const sectionData = JSON.parse(document.getElementById('section').value);
 
-            const flow = await fetchFlowData();
-            const weather = await fetchWeatherData();
+            const flow = await fetchFlowData(sectionData.site);
+            const weather = await fetchWeatherData(sectionData.town);
 
-            const prompt = `What fly should I use if I am going fishing at ${timeOfDay} on the ${location}, the flow is ${flow} CFS, and the weather is going to be ${weather.condition} with a temperature of ${weather.temp}°C?`;
+            const prompt = `What fly should I use if I am going fishing at ${timeOfDay} on the ${sectionData.section} of the ${sectionData.river}, the flow is ${flow} CFS, and the weather is going to be ${weather.condition} with a temperature of ${weather.temp}°C for ${species}?`;
 
             document.getElementById('output').innerText = prompt;
         });
