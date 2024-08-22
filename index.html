@@ -209,17 +209,17 @@
         }
 
         document.getElementById('submitBtn').addEventListener('click', async function() {
-            const timeOfDay = document.getElementById('timeOfDay').value;
-            const species = document.getElementById('species').value;
-            const sectionData = JSON.parse(document.getElementById('section').value);
+    const timeOfDay = document.getElementById('timeOfDay').value;
+    const species = document.getElementById('species').value;
+    const sectionData = JSON.parse(document.getElementById('section').value);
 
-            const flow = await fetchFlowData(sectionData.site);
-            const weather = await fetchWeatherData(sectionData.town);
+    const flow = await fetchFlowData(sectionData.site);
+    const weather = await fetchWeatherData(sectionData.town);
 
-            const prompt = `What fly should I use if I am going fishing at ${timeOfDay} on the ${sectionData.section} of the ${sectionData.river}, the flow is ${flow} CFS, and the weather is going to be ${weather.condition} with a temperature of ${weather.temp}°C for ${species}?`;
+    const prompt = `What fly should I use if I am going fishing in the ${sectionData.section} section of the ${document.getElementById('river').options[document.getElementById('river').selectedIndex].text}, in the ${timeOfDay}? The flow is ${flow} CFS, and the weather is going to be ${weather.condition} with a temperature of ${weather.temp}°C. I am targeting ${species}.`;
 
-            document.getElementById('output').innerText = prompt;
-        });
+    document.getElementById('output').innerText = prompt;
+});
     </script>
 </body>
 </html>
